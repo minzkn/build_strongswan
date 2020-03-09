@@ -1,10 +1,11 @@
 # build_strongswan
 strongswan build script with dependency packages
 
-https://www.minzkn.com/moniwiki/wiki.php/AnalysisStrongswan
-
-https://github.com/minzkn/build_strongswan
-$ git clone https://github.com/minzkn/build_strongswan.git
+* https://www.minzkn.com/moniwiki/wiki.php/AnalysisStrongswan
+* https://github.com/minzkn/build_strongswan
+	<pre>
+	$ git clone https://github.com/minzkn/build_strongswan.git
+	</pre>
 
 
 Dependency sources
@@ -22,8 +23,10 @@ Dependency sources
 HOWTO build
 ===========
 
-# make def_hwport_root=/usr/local/strongswan-5.5.3
+<pre>
+$ make def_hwport_root=/usr/local/strongswan-5.5.3
 ...
+</pre>
 
 이렇게 빌드하면 최종 objs/output하위에 /usr/local/strongswan-5.5.3이 만들어지고 이 하위에 prefix 기준으로 배치되게 되며 objs/output/usr 을 실행 실행할 타겟 보드의 / 로 위치하게 되면 타겟보드에서 /usr/local/strongswan-5.5.3/usr/sbin/ipsec 경로의 ipsec 명령어를 환경변수등의 별도 설정 없이 실행하는한 경로로 잡혀서 구동가능하게 빌드됨.
 
