@@ -17,14 +17,14 @@ Dependency sources
 * libressl-2.5.4
 * openldap-2.4.44
 * curl-7.54.0
-* strongswan-5.5.1 or strongswan-5.5.2 or strongswan-5.5.3
+* strongswan-5.8.2
 
 
 HOWTO build
 ===========
 
 <pre>
-$ make def_hwport_root=/usr/local/strongswan-5.5.3
+$ make def_hwport_root=/usr/local/strongswan-5.8.2
 ...
 </pre>
 
@@ -35,11 +35,13 @@ $ make def_hwport_root=/usr/local/strongswan-5.5.3
 빌드가 완료되면 "objs/output" 에 최종 stage2 (build후 install 첫 단계, 선별되지 않은 전체 설치) 에 해당하는 빌드결과물 생성
 빌드하는 디렉토리와 실제 소스원본의 디렉토리에 영향을 주지 않는 구조로 script가 작성되어 있어서 빌드 결과물 및 중간과정물들은 모두 "objs" 디렉토리에서 생성됩니다.
 
+
 SeeAlso
 =======
 
-* "Required Kernel Modules - strongSwan":http://wiki.strongswan.org/projects/strongswan/wiki/KernelModules
-* "strongSwan 4.2 - Installation":https://www.strongswan.org/docs/install42.htm
+* "strongSwan home page":https://www.strongswan.org/
+** "strongSwan 4.2 - Installation":https://www.strongswan.org/docs/install42.htm
+** "Required Kernel Modules - strongSwan":http://wiki.strongswan.org/projects/strongswan/wiki/KernelModules
 * "Autoconf options for the most current strongSwan release":https://wiki.strongswan.org/projects/strongswan/wiki/Autoconf
 * 일반적인 autoconf/automake 기반의 source를 빌드하는 일반적인 방법 요약
 	<pre>
@@ -50,8 +52,8 @@ SeeAlso
 	  --exec_prefix=${RUNTIME_ROOTENTRY}${RUNTIME_PREFIX} \
 	  --sysconfdir=${RUNTIME_ROOTENTRY}/etc \
 	  --localstatedir=${RUNTIME_ROOTENTRY}/var
-	$ make -j17 all
-	$ make -j17 DESTDIR=${STAGE2} install
+	$ make -j$(JOBS) all
+	$ make -j$(JOBS) DESTDIR=${STAGE2} install
 	</pre>
 
 

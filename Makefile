@@ -22,6 +22,8 @@ else
   endif
 endif
 
+JOBS:=8#
+
 # ----
 
 # Delete default rules. We don't use them. This saves a bit of time.
@@ -42,7 +44,8 @@ DEF_HWPORT_PATH_SOURCE_LIBRESSL:=$(DEF_HWPORT_PATH_CURRENT)/libressl-2.5.4#
 #DEF_HWPORT_PATH_SOURCE_OPENLDAP:=$(DEF_HWPORT_PATH_CURRENT)/openldap-2.4.40#
 DEF_HWPORT_PATH_SOURCE_OPENLDAP:=$(DEF_HWPORT_PATH_CURRENT)/openldap-2.4.44#
 DEF_HWPORT_PATH_SOURCE_CURL:=$(DEF_HWPORT_PATH_CURRENT)/curl-7.54.0#
-DEF_HWPORT_PATH_SOURCE_STRONGSWAN:=$(DEF_HWPORT_PATH_CURRENT)/strongswan-5.5.2#
+#DEF_HWPORT_PATH_SOURCE_STRONGSWAN:=$(DEF_HWPORT_PATH_CURRENT)/strongswan-5.5.2#
+DEF_HWPORT_PATH_SOURCE_STRONGSWAN:=$(DEF_HWPORT_PATH_CURRENT)/strongswan-5.8.2#
 
 # ----
 
@@ -117,7 +120,7 @@ $(DEF_HWPORT_PATH_STAGE1)/gmp/.done: $(DEF_HWPORT_PATH_SOURCE_GMP)
 	    --localstatedir='/var' \
 	    --enable-cxx \
 	    --disable-static
-	@make -j17 -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
+	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
 	@make -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" install
 	@sed -i -e "s,^dependency_libs\=\(.*\)\s/usr/lib/libgmp\.la\(.*\)$$,dependency_libs=\1 $(DEF_HWPORT_PATH_STAGE2)/usr/lib/libgmp.la\2,g" "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libgmpxx.la"
 	@sed -i -e "s,^libdir=.*$$,libdir='$(DEF_HWPORT_PATH_STAGE2)/usr/lib'," "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libgmp.la"
@@ -140,7 +143,7 @@ $(DEF_HWPORT_PATH_STAGE1)/zlib/.done: $(DEF_HWPORT_PATH_SOURCE_ZLIB)
 	    --includedir="/usr/include" \
 	    --libdir="/usr/lib" \
 	    --shared
-	@make -j1 -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
+	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
 	@make -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" install
 	@touch "$(@)"
 
@@ -175,7 +178,7 @@ $(DEF_HWPORT_PATH_STAGE1)/gmp/.done
 	    enable-tls \
 	    enable-tlsext \
 	    linux-x86_64
-	@make -j1 -C "$(dir $(@))" INSTALL_PREFIX="$(DEF_HWPORT_PATH_STAGE2)"	
+	@make -j$(JOBS) -C "$(dir $(@))" INSTALL_PREFIX="$(DEF_HWPORT_PATH_STAGE2)"	
 	@make -C "$(dir $(@))" INSTALL_PREFIX="$(DEF_HWPORT_PATH_STAGE2)" MANDIR="$(DEF_HWPORT_PATH_STAGE2)/usr/share/man" MANSUFFIX=ssl install
 	@touch "$(@)"
 
@@ -195,7 +198,7 @@ $(DEF_HWPORT_PATH_STAGE1)/libressl/.done: $(DEF_HWPORT_PATH_SOURCE_LIBRESSL)
 	    --localstatedir='/var' \
 	    --disable-static \
 	    --enable-shared
-	@make -j1 -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
+	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
 	@make -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" install
 	@sed -i -e "s,^dependency_libs\=\(.*\)\s/usr/lib/libcrypto\.la\(.*\)$$,dependency_libs=\1 $(DEF_HWPORT_PATH_STAGE2)/usr/lib/libcrypto.la\2,g" "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libssl.la"
 	@sed -i -e "s,^dependency_libs\=\(.*\)\s/usr/lib/libcrypto\.la\(.*\)$$,dependency_libs=\1 $(DEF_HWPORT_PATH_STAGE2)/usr/lib/libcrypto.la\2,g" "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libtls.la"
@@ -242,7 +245,7 @@ $(DEF_HWPORT_PATH_STAGE1)/libressl/.done
 	    --with-yielding-select \
 	    --enable-dynamic=yes
 	@make -j1 -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" depend
-	@make -j1 -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
+	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
 	@make -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" install
 	@sed -i -e "s,^dependency_libs\=\(.*\)\s/usr/lib/liblber\.la\(.*\)$$,dependency_libs=\1 $(DEF_HWPORT_PATH_STAGE2)/usr/lib/liblber.la\2,g" "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libldap.la"
 	@sed -i -e "s,^dependency_libs\=\(.*\)\s/usr/lib/liblber\.la\(.*\)$$,dependency_libs=\1 $(DEF_HWPORT_PATH_STAGE2)/usr/lib/liblber.la\2,g" "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libldap_r.la"
@@ -308,7 +311,7 @@ $(DEF_HWPORT_PATH_STAGE1)/openldap/.done
 	    --without-ca-bundle \
 	    --with-random=/dev/urandom \
 	    --with-lber-lib=liblber.so
-	@make -j1 -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
+	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
 	@make -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" install
 	@sed -i -e "s,^libdir=.*$$,libdir=$(DEF_HWPORT_PATH_STAGE2)/usr/lib," "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libcurl.la"
 	@touch "$(@)"
@@ -377,8 +380,9 @@ $(DEF_HWPORT_PATH_STAGE1)/curl/.done
 	    --enable-ldap \
 	    --disable-xauth-pam \
 	    --disable-connmark \
-	    --disable-forecast
-	@make -j1 -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"
+	    --disable-forecast \
+	    --disable-soup
+	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"
 	@make -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" install
 	@touch "$(@)"
 

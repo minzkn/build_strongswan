@@ -1,0 +1,53 @@
+# ipsec.conf example
+
+#conn "<MyInitiator-name>"
+#        left = %any
+#        keyexchange = ikev2
+#        authby = psk
+#        right = <remote tunnel IP address>
+#        leftsubnet = 10.0.0.0/8[%any/%any]
+#        rightsubnet = 192.168.0.0/24[%any/%any]
+#        aggressive = no
+#        auto = start
+#        closeaction = restart
+#        mobike = no
+#        dpdaction = restart
+#        dpddelay = 3s
+#        dpdtimeout = 10s
+#        ike = aes128-sha1-modp1024!
+#        ikelifetime = 86400s
+#        type = tunnel
+#        esp = aes128gcm8,aes128-sha1!
+#        lifetime = 28800s
+#        inactivity = 30s
+#        abnormaltimeout = 0s
+#        forceencaps = no
+#        replay_window = 0
+#        keyingtries = %forever
+#        margintime = 288s
+#
+#conn "<MyResponder-name>"
+#        left = %any
+#        keyexchange = ikev2
+#        authby = psk
+#        right = %any
+#        leftsubnet = 192.168.0.0/24[%any/%any]
+#        rightsubnet = 10.0.0.0/8[%any/%any]
+#        aggressive = no
+#        auto = add
+#        rekey = no
+#        reauth = no
+#        mobike = no
+#        ike = aes128-sha1-modp1024!
+#        ikelifetime = 86400s
+#        type = tunnel
+#        esp = aes128gcm8,aes128-sha1!
+#        lifetime = 28800s
+#        inactivity = 30s
+#        abnormaltimeout = 0s
+#        forceencaps = no
+#        replay_window = 0
+#        keyingtries = %forever
+#        margintime = 288s
+
+# End of ipsec.conf.example

@@ -1,0 +1,37 @@
+# strongswan.conf example
+
+charon {
+        install_routes = no
+        retransmit_base = 1.0
+        retransmit_timeout = 2.0
+        retransmit_tries = 3
+        ikesa_limit = 20000
+        reuse_ikesa = no
+        block_threshold = 1000
+        cookie_threshold = 1000
+        threads = 16
+        filelog {
+                /ferret/log/ipsec/charon.log {
+                        time_format = %b %e %T
+                        time_add_ms = yes
+                        append = yes
+                        flush_line = yes
+                        ike_name = yes
+                        default = 1
+                }
+        }
+        plugins {
+                openssl {
+                        engine_id = openssl_crypter
+                }
+                attr {
+                        netmask = 255.255.255.0
+                }
+        }
+}
+
+#libstrongswan {
+#        dh_exponent_ansi_x9_42 = no
+#}
+
+# End of strongswan.conf.example
