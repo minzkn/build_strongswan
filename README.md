@@ -1,6 +1,11 @@
 # build_strongswan
 strongswan build script with dependency packages
 
+https://www.minzkn.com/moniwiki/wiki.php/AnalysisStrongswan
+
+https://github.com/minzkn/build_strongswan
+$ git clone https://github.com/minzkn/build_strongswan.git
+
 
 Dependency sources
 ==================
