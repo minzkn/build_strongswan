@@ -39,9 +39,8 @@ DEF_HWPORT_PATH_STAGE3:=$(DEF_HWPORT_PATH_CURRENT)/objs/rootfs#
 
 DEF_HWPORT_PATH_SOURCE_GMP:=$(DEF_HWPORT_PATH_CURRENT)/gmp-6.1.2#
 DEF_HWPORT_PATH_SOURCE_ZLIB:=$(DEF_HWPORT_PATH_CURRENT)/zlib-1.2.11#
-DEF_HWPORT_PATH_SOURCE_OPENSSL:=$(DEF_HWPORT_PATH_CURRENT)/openssl-1.1.0e
+DEF_HWPORT_PATH_SOURCE_OPENSSL:=$(DEF_HWPORT_PATH_CURRENT)/openssl-1.1.1c
 DEF_HWPORT_PATH_SOURCE_CURL:=$(DEF_HWPORT_PATH_CURRENT)/curl-7.54.0#
-#DEF_HWPORT_PATH_SOURCE_STRONGSWAN:=$(DEF_HWPORT_PATH_CURRENT)/strongswan-5.5.2#
 DEF_HWPORT_PATH_SOURCE_STRONGSWAN:=$(DEF_HWPORT_PATH_CURRENT)/strongswan-5.8.2#
 
 # ----
@@ -155,28 +154,20 @@ $(DEF_HWPORT_PATH_STAGE1)/gmp/.done
 	@mkdir -p "$(DEF_HWPORT_PATH_STAGE2)"
 	@mkdir -p "$(DEF_HWPORT_PATH_STAGE3)"
 	@cd "$(dir $(@))";\
-	    ./Configure \
-	    --prefix='/usr' \
-	    --openssldir='/etc/ssl' \
-	    --libdir='lib' \
-	    -I$(DEF_HWPORT_PATH_STAGE2)/usr/include \
-	    -L$(DEF_HWPORT_PATH_STAGE2)/usr/lib \
-	    shared \
-	    threads \
-	    zlib-dynamic \
-	    no-asm \
-	    enable-seed \
-	    enable-camellia \
-	    enable-gmp \
-	    enable-ec \
-	    enable-idea \
-	    enable-rc5 \
-	    enable-mdc2 \
-	    enable-tls \
-	    enable-tlsext \
-	    linux-x86_64
-	@make -j$(JOBS) -C "$(dir $(@))" INSTALL_PREFIX="$(DEF_HWPORT_PATH_STAGE2)"	
-	@make -C "$(dir $(@))" INSTALL_PREFIX="$(DEF_HWPORT_PATH_STAGE2)" MANDIR="$(DEF_HWPORT_PATH_STAGE2)/usr/share/man" MANSUFFIX=ssl install
+		./config \
+			--prefix='/usr' \
+			--openssldir='/etc/ssl' \
+			--libdir='/usr/lib' \
+			-D_REENTRANT \
+			-D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 \
+			-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
+			-I$(DEF_HWPORT_PATH_STAGE2)/usr/include \
+			-L$(DEF_HWPORT_PATH_STAGE2)/usr/lib \
+			shared threads \
+			> /dev/null
+	@make -j1 -C "$(dir $(@))" DESTDIR="$(abspath $(DEF_HWPORT_PATH_STAGE2))" depend
+	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(abspath $(DEF_HWPORT_PATH_STAGE2))" all
+	@make -C "$(dir $(@))" DESTDIR="$(abspath $(DEF_HWPORT_PATH_STAGE2))" install
 	@touch "$(@)"
 
 .PHONY: curl
