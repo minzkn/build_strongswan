@@ -1,3 +1,0 @@
-carol::swanctl --terminate --ike home
-carol::service charon stop 2> /dev/null
-moon::service charon stop 2> /dev/null

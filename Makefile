@@ -39,10 +39,7 @@ DEF_HWPORT_PATH_STAGE3:=$(DEF_HWPORT_PATH_CURRENT)/objs/rootfs#
 
 DEF_HWPORT_PATH_SOURCE_GMP:=$(DEF_HWPORT_PATH_CURRENT)/gmp-6.1.2#
 DEF_HWPORT_PATH_SOURCE_ZLIB:=$(DEF_HWPORT_PATH_CURRENT)/zlib-1.2.11#
-DEF_HWPORT_PATH_SOURCE_OPENSSL:=$(DEF_HWPORT_PATH_CURRENT)/openssl-1.1.0e# FAILED: openldap-2.4.44
-DEF_HWPORT_PATH_SOURCE_LIBRESSL:=$(DEF_HWPORT_PATH_CURRENT)/libressl-2.5.4#
-#DEF_HWPORT_PATH_SOURCE_OPENLDAP:=$(DEF_HWPORT_PATH_CURRENT)/openldap-2.4.40#
-DEF_HWPORT_PATH_SOURCE_OPENLDAP:=$(DEF_HWPORT_PATH_CURRENT)/openldap-2.4.44#
+DEF_HWPORT_PATH_SOURCE_OPENSSL:=$(DEF_HWPORT_PATH_CURRENT)/openssl-1.1.0e
 DEF_HWPORT_PATH_SOURCE_CURL:=$(DEF_HWPORT_PATH_CURRENT)/curl-7.54.0#
 #DEF_HWPORT_PATH_SOURCE_STRONGSWAN:=$(DEF_HWPORT_PATH_CURRENT)/strongswan-5.5.2#
 DEF_HWPORT_PATH_SOURCE_STRONGSWAN:=$(DEF_HWPORT_PATH_CURRENT)/strongswan-5.8.2#
@@ -182,83 +179,10 @@ $(DEF_HWPORT_PATH_STAGE1)/gmp/.done
 	@make -C "$(dir $(@))" INSTALL_PREFIX="$(DEF_HWPORT_PATH_STAGE2)" MANDIR="$(DEF_HWPORT_PATH_STAGE2)/usr/share/man" MANSUFFIX=ssl install
 	@touch "$(@)"
 
-# https://www.libressl.org/
-.PHONY: libressl
-libressl: $(DEF_HWPORT_PATH_STAGE1)/libressl/.done
-$(DEF_HWPORT_PATH_STAGE1)/libressl/.done: $(DEF_HWPORT_PATH_SOURCE_LIBRESSL)
-	@mkdir -p "$(dir $(@))" && rm -rf "$(dir $(@))/*" && tar -c --exclude=.svn/* --exclude=.git/* -C "$(<)" . | tar -xv -C "$(dir $(@))/"
-	@mkdir -p "$(DEF_HWPORT_PATH_STAGE2)"
-	@mkdir -p "$(DEF_HWPORT_PATH_STAGE3)"
-	@cd "$(dir $(@))";\
-	    CPPFLAGS="-I$(DEF_HWPORT_PATH_STAGE2)/usr/include" \
-	    LDFLAGS="-L$(DEF_HWPORT_PATH_STAGE2)/usr/lib" \
-	    ./configure \
-	    --prefix='/usr' \
-	    --sysconfdir='/etc' \
-	    --localstatedir='/var' \
-	    --disable-static \
-	    --enable-shared
-	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
-	@make -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" install
-	@sed -i -e "s,^dependency_libs\=\(.*\)\s/usr/lib/libcrypto\.la\(.*\)$$,dependency_libs=\1 $(DEF_HWPORT_PATH_STAGE2)/usr/lib/libcrypto.la\2,g" "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libssl.la"
-	@sed -i -e "s,^dependency_libs\=\(.*\)\s/usr/lib/libcrypto\.la\(.*\)$$,dependency_libs=\1 $(DEF_HWPORT_PATH_STAGE2)/usr/lib/libcrypto.la\2,g" "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libtls.la"
-	@sed -i -e "s,^dependency_libs\=\(.*\)\s/usr/lib/libssl\.la\(.*\)$$,dependency_libs=\1 $(DEF_HWPORT_PATH_STAGE2)/usr/lib/libssl.la\2,g" "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libtls.la"
-	@sed -i -e "s,^libdir=.*$$,libdir='$(DEF_HWPORT_PATH_STAGE2)/usr/lib'," "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libcrypto.la"
-	@sed -i -e "s,^libdir=.*$$,libdir='$(DEF_HWPORT_PATH_STAGE2)/usr/lib'," "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libssl.la"
-	@sed -i -e "s,^libdir=.*$$,libdir='$(DEF_HWPORT_PATH_STAGE2)/usr/lib'," "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libtls.la"
-	@touch "$(@)"
-
-.PHONY: openldap
-openldap: $(DEF_HWPORT_PATH_STAGE1)/openldap/.done
-$(DEF_HWPORT_PATH_STAGE1)/openldap/.done: $(DEF_HWPORT_PATH_SOURCE_OPENLDAP) \
-$(DEF_HWPORT_PATH_STAGE1)/gmp/.done \
-$(DEF_HWPORT_PATH_STAGE1)/libressl/.done
-	@mkdir -p "$(dir $(@))" && rm -rf "$(dir $(@))/*" && tar -c --exclude=.svn/* --exclude=.git/* -C "$(<)" . | tar -xv -C "$(dir $(@))/"
-	@mkdir -p "$(DEF_HWPORT_PATH_STAGE2)"
-	@mkdir -p "$(DEF_HWPORT_PATH_STAGE3)"
-	@cd "$(dir $(@))";\
-	    CPPFLAGS="-I$(DEF_HWPORT_PATH_STAGE2)/usr/include" \
-	    LDFLAGS="-L$(DEF_HWPORT_PATH_STAGE2)/usr/lib" \
-	    ac_cv_func_memcmp_working=yes \
-	    ./configure \
-	    --prefix='/usr' \
-	    --sysconfdir='/etc' \
-	    --localstatedir='/var' \
-	    --libexecdir='/usr/lib' \
-	    --enable-ldap \
-	    --disable-static \
-	    --disable-debug \
-	    --enable-slapd \
-	    --with-threads \
-	    --with-tls=openssl \
-	    --enable-crypt \
-	    --with-mp=gmp \
-	    --enable-modules \
-	    --enable-rlookups \
-	    --disable-ndb \
-	    --disable-sql \
-	    --disable-shell \
-	    --disable-bdb \
-	    --disable-hdb \
-	    --disable-mdb \
-	    --enable-overlays=mod \
-	    --with-yielding-select \
-	    --enable-dynamic=yes
-	@make -j1 -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" depend
-	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
-	@make -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" install
-	@sed -i -e "s,^dependency_libs\=\(.*\)\s/usr/lib/liblber\.la\(.*\)$$,dependency_libs=\1 $(DEF_HWPORT_PATH_STAGE2)/usr/lib/liblber.la\2,g" "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libldap.la"
-	@sed -i -e "s,^dependency_libs\=\(.*\)\s/usr/lib/liblber\.la\(.*\)$$,dependency_libs=\1 $(DEF_HWPORT_PATH_STAGE2)/usr/lib/liblber.la\2,g" "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libldap_r.la"
-	@sed -i -e "s,^libdir=.*$$,libdir=$(DEF_HWPORT_PATH_STAGE2)/usr/lib," "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/liblber.la"
-	@sed -i -e "s,^libdir=.*$$,libdir=$(DEF_HWPORT_PATH_STAGE2)/usr/lib," "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libldap.la"
-	@sed -i -e "s,^libdir=.*$$,libdir=$(DEF_HWPORT_PATH_STAGE2)/usr/lib," "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libldap_r.la"
-	@touch "$(@)"
-
 .PHONY: curl
 curl: $(DEF_HWPORT_PATH_STAGE1)/curl/.done
 $(DEF_HWPORT_PATH_STAGE1)/curl/.done: $(DEF_HWPORT_PATH_SOURCE_CURL) \
-$(DEF_HWPORT_PATH_STAGE1)/libressl/.done \
-$(DEF_HWPORT_PATH_STAGE1)/openldap/.done
+$(DEF_HWPORT_PATH_STAGE1)/openssl/.done
 	@mkdir -p "$(dir $(@))" && rm -rf "$(dir $(@))/*" && tar -c --exclude=.svn/* --exclude=.git/* -C "$(<)" . | tar -xv -C "$(dir $(@))/"
 	@mkdir -p "$(DEF_HWPORT_PATH_STAGE2)"
 	@mkdir -p "$(DEF_HWPORT_PATH_STAGE3)"
@@ -320,7 +244,7 @@ $(DEF_HWPORT_PATH_STAGE1)/openldap/.done
 strongswan: $(DEF_HWPORT_PATH_STAGE1)/strongswan/.done
 $(DEF_HWPORT_PATH_STAGE1)/strongswan/.done: $(DEF_HWPORT_PATH_SOURCE_STRONGSWAN) \
 $(DEF_HWPORT_PATH_STAGE1)/gmp/.done \
-$(DEF_HWPORT_PATH_STAGE1)/libressl/.done \
+$(DEF_HWPORT_PATH_STAGE1)/openssl/.done \
 $(DEF_HWPORT_PATH_STAGE1)/curl/.done
 	@mkdir -p "$(dir $(@))" && rm -rf "$(dir $(@))/*"
 	@mkdir -p "$(DEF_HWPORT_PATH_STAGE2)"
@@ -377,7 +301,7 @@ $(DEF_HWPORT_PATH_STAGE1)/curl/.done
 	    --enable-swanctl=yes \
 	    --enable-socket-dynamic \
 	    --disable-monolithic \
-	    --enable-ldap \
+	    --disable-ldap \
 	    --disable-xauth-pam \
 	    --disable-connmark \
 	    --disable-forecast \
