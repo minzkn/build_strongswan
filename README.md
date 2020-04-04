@@ -17,7 +17,7 @@ Dependency sources
 * libressl-2.5.4
 * openldap-2.4.44
 * curl-7.54.0
-* strongswan-5.8.2
+* strongswan-5.8.4
 
 
 HOWTO build
