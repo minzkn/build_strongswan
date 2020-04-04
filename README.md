@@ -24,7 +24,7 @@ HOWTO build
 ===========
 
 <pre>
-$ make def_hwport_root=/usr/local/strongswan-5.8.2
+$ make def_hwport_root=/usr/local/strongswan-5.8.4
 ...
 </pre>
 
