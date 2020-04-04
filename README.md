@@ -13,9 +13,7 @@ Dependency sources
 
 * gmp-6.1.2
 * zlib-1.2.11
-* openssl-1.0.2k : openldap-2.4.44와 빌드 의존성에 심볼 수정이 다소 필요
-* libressl-2.5.4
-* openldap-2.4.44
+* openssl-1.1.1c
 * curl-7.54.0
 * strongswan-5.8.4
 
