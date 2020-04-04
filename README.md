@@ -1,6 +1,11 @@
 # build_strongswan
 strongswan build script with dependency packages
 
+빌드 기본 환경 : Ubuntu 배포판의 경우
+    <pre>
+    $ sudo apt install build-essential autoconf automake autotools-dev
+    </pre>
+
 * https://www.minzkn.com/moniwiki/wiki.php/AnalysisStrongswan
 * https://github.com/minzkn/build_strongswan
 	<pre>
