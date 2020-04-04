@@ -11,22 +11,22 @@ strongswan build script with dependency packages
 Dependency sources
 ==================
 
-* gmp-6.1.2
-* zlib-1.2.11
-* openssl-1.1.1c
-* curl-7.54.0
-* strongswan-5.8.4
+* >= gmp-6.1.2
+* >= zlib-1.2.11
+* >= openssl-1.1.1c
+* >= curl-7.54.0
+* >= strongswan-5.8.4
 
 
 HOWTO build
 ===========
 
 <pre>
-$ make def_hwport_root=/usr/local/strongswan-5.8.4
+$ make def_hwport_root=/usr/local/strongswan
 ...
 </pre>
 
-이렇게 빌드하면 최종 objs/output하위에 /usr/local/strongswan-5.5.3이 만들어지고 이 하위에 prefix 기준으로 배치되게 되며 objs/output/usr 을 실행 실행할 타겟 보드의 / 로 위치하게 되면 타겟보드에서 /usr/local/strongswan-5.5.3/usr/sbin/ipsec 경로의 ipsec 명령어를 환경변수등의 별도 설정 없이 실행하는한 경로로 잡혀서 구동가능하게 빌드됨.
+이렇게 빌드하면 최종 "objs/output" 하위에 "/usr/local/strongswan" 이 만들어지고 이 하위에 prefix 기준으로 배치되게 되며 "objs/output/usr" 을 실행 실행할 타겟 보드의 / 로 위치하게 되면 타겟보드에서 "/usr/local/strongswan/usr/sbin/ipsec" 경로의 ipsec 명령어를 환경변수등의 별도 설정 없이 실행하는한 경로로 잡혀서 구동가능하게 빌드됨.
 
 즉, "" + "/objs/output" + "${def_hwport_root}" + "${def_hwport_sbindir}" + "/ipsec" 이 위치하게 되는 형태로 빌드구성됨.
 
