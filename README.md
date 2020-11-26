@@ -28,13 +28,11 @@ HOWTO build
 ===========
 
 <pre>
-$ make def_hwport_root=/usr/local/strongswan
+$ make -j64
 ...
 </pre>
 
 이렇게 빌드하면 최종 "objs/output" 하위에 "/usr/local/strongswan" 이 만들어지고 이 하위에 prefix 기준으로 배치되게 되며 "objs/output/usr" 을 실행 실행할 타겟 보드의 / 로 위치하게 되면 타겟보드에서 "/usr/local/strongswan/usr/sbin/ipsec" 경로의 ipsec 명령어를 환경변수등의 별도 설정 없이 실행하는한 경로로 잡혀서 구동가능하게 빌드됨.
-
-즉, "" + "/objs/output" + "${def_hwport_root}" + "${def_hwport_sbindir}" + "/ipsec" 이 위치하게 되는 형태로 빌드구성됨.
 
 빌드가 완료되면 "objs/output" 에 최종 stage2 (build후 install 첫 단계, 선별되지 않은 전체 설치) 에 해당하는 빌드결과물 생성
 빌드하는 디렉토리와 실제 소스원본의 디렉토리에 영향을 주지 않는 구조로 script가 작성되어 있어서 빌드 결과물 및 중간과정물들은 모두 "objs" 디렉토리에서 생성됩니다.
