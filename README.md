@@ -17,12 +17,18 @@ strongswan build script with dependency packages
 Dependency sources
 ==================
 
-* >= gmp-6.1.2
+* >= gmp-6.2.1
+** from https://gmplib.org/
 * >= zlib-1.2.11
-* >= openssl-1.1.1c
-* >= curl-7.54.0
-* >= strongswan-5.8.4
+** from https://zlib.net/
+* >= openssl-1.1.1g
+** from https://www.openssl.org/
+* >= curl-7.73.0
+** from https://curl.se/
+* >= strongswan-5.9.1
+** from https://www.strongswan.org/
 
+TODO: LDAP, ...
 
 HOWTO build
 ===========
