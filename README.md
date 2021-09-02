@@ -1,9 +1,13 @@
 # build_strongswan
 strongswan build script with dependency packages
 
+Tired of building? I'm here to help.
+
+
+
 빌드 기본 환경 : Ubuntu 배포판의 경우
     <pre>
-    $ sudo apt install build-essential autoconf automake autotools-dev
+    $ sudo apt install build-essential autoconf automake autotools-dev pkg-config perl
     </pre>
 
 * https://www.strongswan.org/
@@ -17,18 +21,22 @@ strongswan build script with dependency packages
 Dependency sources
 ==================
 
-* >= gmp-6.2.1
-** from https://gmplib.org/
 * >= zlib-1.2.11
 ** from https://zlib.net/
-* >= openssl-1.1.1g
+* >= gmp-6.2.1
+** from https://gmplib.org/
+* >= openssl-1.1.1l
 ** from https://www.openssl.org/
-* >= curl-7.73.0
+* >= openldap-2.5.7
+** from https://www.openldap.org/
+* >= curl-7.78.0
 ** from https://curl.se/
-* >= strongswan-5.9.1
+* >= strongswan-5.9.3
 ** from https://www.strongswan.org/
 
-TODO: LDAP, ...
+Thanks for all project ~
+
+TODO: ...
 
 HOWTO build
 ===========

@@ -37,11 +37,16 @@ DEF_HWPORT_PATH_STAGE1:=$(DEF_HWPORT_PATH_CURRENT)/objs#
 DEF_HWPORT_PATH_STAGE2:=$(DEF_HWPORT_PATH_CURRENT)/objs/output#
 DEF_HWPORT_PATH_STAGE3:=$(DEF_HWPORT_PATH_CURRENT)/objs/rootfs#
 
-DEF_HWPORT_PATH_SOURCE_GMP:=$(DEF_HWPORT_PATH_CURRENT)/gmp-6.2.1# from https://gmplib.org/
+DEF_HWPORT_PREFIX:=/usr#
+DEF_HWPORT_SYSCONFDIR:=/etc#
+DEF_HWPORT_LOCALSTATEDIR:=/var#
+
 DEF_HWPORT_PATH_SOURCE_ZLIB:=$(DEF_HWPORT_PATH_CURRENT)/zlib-1.2.11# from https://zlib.net/
-DEF_HWPORT_PATH_SOURCE_OPENSSL:=$(DEF_HWPORT_PATH_CURRENT)/openssl-1.1.1g# from https://www.openssl.org/
-DEF_HWPORT_PATH_SOURCE_CURL:=$(DEF_HWPORT_PATH_CURRENT)/curl-7.73.0# from https://curl.se/
-DEF_HWPORT_PATH_SOURCE_STRONGSWAN:=$(DEF_HWPORT_PATH_CURRENT)/strongswan-5.9.1# from https://www.strongswan.org/
+DEF_HWPORT_PATH_SOURCE_GMP:=$(DEF_HWPORT_PATH_CURRENT)/gmp-6.2.1# from https://gmplib.org/
+DEF_HWPORT_PATH_SOURCE_OPENSSL:=$(DEF_HWPORT_PATH_CURRENT)/openssl-1.1.1l# from https://www.openssl.org/
+DEF_HWPORT_PATH_SOURCE_OPENLDAP:=$(DEF_HWPORT_PATH_CURRENT)/openldap-2.5.7# from https://www.openldap.org/
+DEF_HWPORT_PATH_SOURCE_CURL:=$(DEF_HWPORT_PATH_CURRENT)/curl-7.78.0# from https://curl.se/
+DEF_HWPORT_PATH_SOURCE_STRONGSWAN:=$(DEF_HWPORT_PATH_CURRENT)/strongswan-5.9.3# from https://www.strongswan.org/
 
 # ----
 
@@ -99,6 +104,26 @@ $(DEF_HWPORT_PATH_STAGE1)/strongswan/.done
 
 # ----
 
+# http://www.linuxfromscratch.org/lfs/view/development/chapter06/zlib.html
+.PHONY: zlib
+zlib: $(DEF_HWPORT_PATH_STAGE1)/zlib/.done
+$(DEF_HWPORT_PATH_STAGE1)/zlib/.done: $(DEF_HWPORT_PATH_SOURCE_ZLIB)
+	@mkdir -p "$(dir $(@))" && rm -rf "$(dir $(@))/*" && tar -c --exclude=.svn/* --exclude=.git/* -C "$(<)" . | tar -xv -C "$(dir $(@))/"
+	@mkdir -p "$(DEF_HWPORT_PATH_STAGE2)"
+	@mkdir -p "$(DEF_HWPORT_PATH_STAGE3)"
+	@cd "$(dir $(@))" && \
+	    CROSS_PREFIX="" \
+	    CFLAGS="-fPIC" \
+	    LDFLAGS="" \
+	    ./configure \
+	    --prefix="$(DEF_HWPORT_PREFIX)" \
+	    --includedir="$(DEF_HWPORT_PREFIX)/include" \
+	    --libdir="$(DEF_HWPORT_PREFIX)/lib" \
+	    --shared
+	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
+	@make -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" install
+	@touch "$(@)"
+
 # http://www.linuxfromscratch.org/lfs/view/development/chapter06/gmp.html
 .PHONY: gmp
 gmp: $(DEF_HWPORT_PATH_STAGE1)/gmp/.done
@@ -106,41 +131,20 @@ $(DEF_HWPORT_PATH_STAGE1)/gmp/.done: $(DEF_HWPORT_PATH_SOURCE_GMP)
 	@mkdir -p "$(dir $(@))" && rm -rf "$(dir $(@))/*" && tar -c --exclude=.svn/* --exclude=.git/* -C "$(<)" . | tar -xv -C "$(dir $(@))/"
 	@mkdir -p "$(DEF_HWPORT_PATH_STAGE2)"
 	@mkdir -p "$(DEF_HWPORT_PATH_STAGE3)"
-	@cd "$(dir $(@))";\
+	@cd "$(dir $(@))" && \
 	    ABI=64 \
-	    CPPFLAGS="-I$(DEF_HWPORT_PATH_STAGE2)/usr/include" \
-	    LDFLAGS="-L$(DEF_HWPORT_PATH_STAGE2)/usr/lib" \
+	    CPPFLAGS="-I$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/include" \
+	    LDFLAGS="-L$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib" \
 	    ./configure \
-	    --prefix='/usr' \
-	    --sysconfdir='/etc' \
-	    --localstatedir='/var' \
-	    --enable-cxx \
-	    --disable-static
+	    --prefix="$(DEF_HWPORT_PREFIX)" \
+	    --sysconfdir="$(DEF_HWPORT_SYSCONFDIR)" \
+	    --localstatedir="$(DEF_HWPORT_LOCALSTATEDIR)" \
+	    --enable-cxx
 	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
 	@make -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" install
-	@sed -i -e "s,^dependency_libs\=\(.*\)\s/usr/lib/libgmp\.la\(.*\)$$,dependency_libs=\1 $(DEF_HWPORT_PATH_STAGE2)/usr/lib/libgmp.la\2,g" "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libgmpxx.la"
-	@sed -i -e "s,^libdir=.*$$,libdir='$(DEF_HWPORT_PATH_STAGE2)/usr/lib'," "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libgmp.la"
-	@sed -i -e "s,^libdir=.*$$,libdir='$(DEF_HWPORT_PATH_STAGE2)/usr/lib'," "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libgmpxx.la"
-	@touch "$(@)"
-
-# http://www.linuxfromscratch.org/lfs/view/development/chapter06/zlib.html
-.PHONY: zlib
-zlib: $(DEF_HWPORT_PATH_STAGE1)/zlib/.done
-$(DEF_HWPORT_PATH_STAGE1)/zlib/.done: $(DEF_HWPORT_PATH_SOURCE_ZLIB)
-	@mkdir -p "$(dir $(@))" && rm -rf "$(dir $(@))/*"
-	@mkdir -p "$(DEF_HWPORT_PATH_STAGE2)"
-	@mkdir -p "$(DEF_HWPORT_PATH_STAGE3)"
-	@cd "$(dir $(@))";\
-	    CROSS_PREFIX="" \
-	    CFLAGS="-fPIC" \
-	    LDFLAGS="" \
-	    $(<)/configure \
-	    --prefix='/usr' \
-	    --includedir="/usr/include" \
-	    --libdir="/usr/lib" \
-	    --shared
-	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
-	@make -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" install
+	@sed -i -e "s,^libdir=.*$$,libdir='$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib'," "$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib/libgmp.la"
+	@sed -i -e "s,^dependency_libs\=\(.*\)\s$(DEF_HWPORT_PREFIX)/lib/libgmp\.la\(.*\)$$,dependency_libs=\1 $(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib/libgmp.la\2,g" "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libgmpxx.la"
+	@sed -i -e "s,^libdir=.*$$,libdir='$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib'," "$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib/libgmpxx.la"
 	@touch "$(@)"
 
 # http://www.linuxfromscratch.org/blfs/view/7.8/postlfs/openssl.html
@@ -153,21 +157,48 @@ $(DEF_HWPORT_PATH_STAGE1)/gmp/.done
 	@mkdir -p "$(dir $(@))" && rm -rf "$(dir $(@))/*" && tar -c --exclude=.svn/* --exclude=.git/* -C "$(<)" . | tar -xv -C "$(dir $(@))/"
 	@mkdir -p "$(DEF_HWPORT_PATH_STAGE2)"
 	@mkdir -p "$(DEF_HWPORT_PATH_STAGE3)"
-	@cd "$(dir $(@))";\
+	@cd "$(dir $(@))" && \
 		./config \
-			--prefix='/usr' \
-			--openssldir='/etc/ssl' \
-			--libdir='/usr/lib' \
+			--prefix="$(DEF_HWPORT_PREFIX)" \
+			--openssldir="$(DEF_HWPORT_SYSCONFDIR)/ssl" \
+			--libdir="$(DEF_HWPORT_PREFIX)/lib" \
 			-D_REENTRANT \
 			-D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 \
 			-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
-			-I$(DEF_HWPORT_PATH_STAGE2)/usr/include \
-			-L$(DEF_HWPORT_PATH_STAGE2)/usr/lib \
+			-I$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/include \
+			-L$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib \
 			shared threads \
 			> /dev/null
 	@make -j1 -C "$(dir $(@))" DESTDIR="$(abspath $(DEF_HWPORT_PATH_STAGE2))" depend
 	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(abspath $(DEF_HWPORT_PATH_STAGE2))" all
 	@make -C "$(dir $(@))" DESTDIR="$(abspath $(DEF_HWPORT_PATH_STAGE2))" install
+	@touch "$(@)"
+
+.PHONY: openldap
+openldap: $(DEF_HWPORT_PATH_STAGE1)/openldap/.done
+$(DEF_HWPORT_PATH_STAGE1)/openldap/.done: $(DEF_HWPORT_PATH_SOURCE_OPENLDAP) \
+$(DEF_HWPORT_PATH_STAGE1)/gmp/.done \
+$(DEF_HWPORT_PATH_STAGE1)/openssl/.done
+	@mkdir -p "$(dir $(@))" && rm -rf "$(dir $(@))/*" && tar -c --exclude=.svn/* --exclude=.git/* -C "$(<)" . | tar -xv -C "$(dir $(@))/"
+	@mkdir -p "$(DEF_HWPORT_PATH_STAGE2)"
+	@mkdir -p "$(DEF_HWPORT_PATH_STAGE3)"
+	@cd "$(dir $(@))" && \
+	    CPPFLAGS="-I$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/include" \
+	    LDFLAGS="-L$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib" \
+	    ./configure \
+	    --prefix="$(DEF_HWPORT_PREFIX)" \
+	    --sysconfdir="$(DEF_HWPORT_SYSCONFDIR)" \
+	    --localstatedir="$(DEF_HWPORT_LOCALSTATEDIR)" \
+	    --disable-bdb \
+	    --disable-hdb \
+	    --with-yielding-select="yes" \
+	    --without-cyrus-sasl \
+	    --with-mp="gmp" \
+	    --with-tls="openssl"
+	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
+	@make -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" install
+	@sed -i -e "s,^libdir=.*$$,libdir='$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib'," "$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib/liblber.la"
+	@sed -i -e "s,^libdir=.*$$,libdir='$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib'," "$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib/libldap.la"
 	@touch "$(@)"
 
 .PHONY: curl
@@ -177,21 +208,18 @@ $(DEF_HWPORT_PATH_STAGE1)/openssl/.done
 	@mkdir -p "$(dir $(@))" && rm -rf "$(dir $(@))/*" && tar -c --exclude=.svn/* --exclude=.git/* -C "$(<)" . | tar -xv -C "$(dir $(@))/"
 	@mkdir -p "$(DEF_HWPORT_PATH_STAGE2)"
 	@mkdir -p "$(DEF_HWPORT_PATH_STAGE3)"
-	@cd "$(dir $(@))";\
-	    CPPFLAGS="-I$(DEF_HWPORT_PATH_STAGE2)/usr/include" \
-	    LDFLAGS="-L$(DEF_HWPORT_PATH_STAGE2)/usr/lib" \
-	    ac_cv_lib_crypto_CRYPTO_lock=yes \
+	@cd "$(dir $(@))" && \
+	    CPPFLAGS="-I$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/include" \
+	    LDFLAGS="-L$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib" \
 	    ./configure \
-	    --prefix='/usr' \
-	    --sysconfdir='/etc' \
-	    --localstatedir='/var' \
+	    --prefix="$(DEF_HWPORT_PREFIX)" \
+	    --sysconfdir="$(DEF_HWPORT_SYSCONFDIR)" \
+	    --localstatedir="$(DEF_HWPORT_LOCALSTATEDIR)" \
 	    --disable-debug \
-	    --enable-shared \
-	    --disable-static \
 	    --disable-ldap \
+	    --disable-ldaps \
 	    --without-kerberos \
 	    --without-libssh2 \
-	    --disable-static-libs \
 	    --enable-ipv6 \
 	    --enable-threads \
 	    --disable-ares \
@@ -219,16 +247,17 @@ $(DEF_HWPORT_PATH_STAGE1)/openssl/.done
 	    --without-spnego \
 	    --without-gnutls \
 	    --without-nss \
-	    --with-zlib='$(DEF_HWPORT_PATH_STAGE2)/usr' \
+	    --with-zlib="$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)" \
 	    --without-libidn \
-	    --with-ssl='$(DEF_HWPORT_PATH_STAGE2)/usr' \
-	    --with-ca-path='/etc/ssl/certs' \
+	    --with-ssl="$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)" \
+	    --with-ca-path="$(DEF_HWPORT_SYSCONFDIR)/ssl/certs" \
 	    --without-ca-bundle \
 	    --with-random=/dev/urandom \
-	    --with-lber-lib=liblber.so
+	    --with-lber-lib="lber" \
+	    --with-ldap-lib="ldap"
 	@make -j$(JOBS) -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)"	
 	@make -C "$(dir $(@))" DESTDIR="$(DEF_HWPORT_PATH_STAGE2)" install
-	@sed -i -e "s,^libdir=.*$$,libdir=$(DEF_HWPORT_PATH_STAGE2)/usr/lib," "$(DEF_HWPORT_PATH_STAGE2)/usr/lib/libcurl.la"
+	@sed -i -e "s,^libdir=.*$$,libdir='$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib'," "$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib/libcurl.la"
 	@touch "$(@)"
 
 .PHONY: strongswan
@@ -236,18 +265,19 @@ strongswan: $(DEF_HWPORT_PATH_STAGE1)/strongswan/.done
 $(DEF_HWPORT_PATH_STAGE1)/strongswan/.done: $(DEF_HWPORT_PATH_SOURCE_STRONGSWAN) \
 $(DEF_HWPORT_PATH_STAGE1)/gmp/.done \
 $(DEF_HWPORT_PATH_STAGE1)/openssl/.done \
+$(DEF_HWPORT_PATH_STAGE1)/openldap/.done \
 $(DEF_HWPORT_PATH_STAGE1)/curl/.done
-	@mkdir -p "$(dir $(@))" && rm -rf "$(dir $(@))/*"
+	@mkdir -p "$(dir $(@))" && rm -rf "$(dir $(@))/*" && tar -c --exclude=.svn/* --exclude=.git/* -C "$(<)" . | tar -xv -C "$(dir $(@))/"
 	@mkdir -p "$(DEF_HWPORT_PATH_STAGE2)"
 	@mkdir -p "$(DEF_HWPORT_PATH_STAGE3)"
 	@cd "$(dir $(@))";\
-	    CPPFLAGS="-I$(DEF_HWPORT_PATH_STAGE2)/usr/include" \
-	    LDFLAGS="-L$(DEF_HWPORT_PATH_STAGE2)/usr/lib" \
-	    LD_LIBRARY_PATH="$(DEF_HWPORT_PATH_STAGE2)/usr/lib" \
-	    $(<)/configure \
-	    --prefix='/usr' \
-	    --sysconfdir='/etc' \
-	    --localstatedir='/var' \
+	    CPPFLAGS="-I$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/include" \
+	    LDFLAGS="-L$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib" \
+	    LD_LIBRARY_PATH="$(DEF_HWPORT_PATH_STAGE2)$(DEF_HWPORT_PREFIX)/lib" \
+	    ./configure \
+	    --prefix="$(DEF_HWPORT_PREFIX)" \
+	    --sysconfdir="$(DEF_HWPORT_SYSCONFDIR)" \
+	    --localstatedir="$(DEF_HWPORT_LOCALSTATEDIR)" \
 	    --without-lib-prefix \
 	    --enable-acert=yes \
 	    --enable-addrblock=yes \
@@ -255,7 +285,7 @@ $(DEF_HWPORT_PATH_STAGE1)/curl/.done
 	    --enable-pkcs11=yes \
 	    --enable-kernel-netlink=yes \
 	    --enable-socket-default=yes \
-	    --enable-openssl=no \
+	    --enable-openssl=yes \
 	    --enable-gcrypt=no \
 	    --enable-gmp=yes \
 	    --enable-af-alg=no \
