@@ -101,6 +101,8 @@ help:
 build: \
 $(DEF_HWPORT_PATH_STAGE1)/strongswan/.done
 	@echo "build complete."
+	@echo "  - STAGE2 : $(DEF_HWPORT_PATH_STAGE2)"
+#	@echo "  - STAGE3 : $(DEF_HWPORT_PATH_STAGE3)"
 
 # ----
 
